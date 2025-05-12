@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+.ant-card .ant-card-body {
+    padding: 8px;
+    border-radius: 0 0 8px 8px;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

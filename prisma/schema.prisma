@@ -1,0 +1,88 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  learningPaths LearningPath[]
+}
+
+model LearningPath {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  topics      String[]
+  totalLessons Int
+  estimatedTime String
+  keySkills   String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id            String   @id @default(cuid())
+  title         String
+  theory        String
+  lessonNumber  Int
+  isCompleted   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  learningPathId String
+  learningPath  LearningPath @relation(fields: [learningPathId], references: [id])
+  questions     Question[]
+}
+
+enum QuestionType {
+  multiple_choice
+  fill_blank
+  essay
+  speaking
+  reading
+  drag_drop
+  matching
+  ordering
+  categorization
+}
+
+model Question {
+  id                 String   @id @default(cuid())
+  question           String
+  type               QuestionType
+  options            Json // For multiple_choice, drag_drop, matching, ordering, categorization, and highlighting only
+  correctAnswer      String?
+  explanation        String?
+  evaluationCriteria String[] // For essay and speaking
+  audioText          String?
+  imageUrl           String?
+  timeLimit          Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  lessonId           String
+  lesson             Lesson   @relation(fields: [lessonId], references: [id])
+  responses          QuestionResponse[]
+}
+
+model QuestionResponse {
+  id          String   @id @default(cuid())
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+  answer      String
+  audioText    String?
+  score       Float?
+  feedback    String?
+  submittedAt DateTime @default(now())
+  timeSpent   Int?     // Time spent in seconds
+}
