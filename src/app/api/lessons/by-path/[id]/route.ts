@@ -1,12 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = await params;
+    const id = new URL(request.url).pathname.split("/").pop();
     const lessons = await prisma.lesson.findMany({
       where: {
         learningPathId: id,
