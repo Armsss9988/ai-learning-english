@@ -6,9 +6,9 @@ import { memo, useCallback, useState } from "react";
 import MarkdownContent from "./MarkdownContent";
 // import AudioRecorder from "./AudioRecorder";
 import { CheckOutlined, SoundOutlined } from "@ant-design/icons";
-import OrderingQuestion from "./OrderingQuestion";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+// import OrderingQuestion from "./OrderingQuestion";
+// import { DndProvider } from "react-dnd";
+// import { HTML5Backend } from "react-dnd-html5-backend";
 import { useEvaluateResponse } from "@/hooks/useLessons";
 import { StarDisplay } from "./StarDisplay";
 import SpeechToText from "./SpeechToText";
@@ -160,12 +160,12 @@ const QuestionCard = memo(({ question, index, onPass }: QuestionCardProps) => {
         );
       case "reading":
         return <MarkdownContent content={question.question} />;
-      case "ordering":
-        return (
-          <DndProvider backend={HTML5Backend}>
-            <OrderingQuestion question={question} />
-          </DndProvider>
-        );
+      // case "ordering":
+      //   return (
+      //     <DndProvider backend={HTML5Backend}>
+      //       <OrderingQuestion question={question} />
+      //     </DndProvider>
+      //   );
       default:
         return null;
     }
