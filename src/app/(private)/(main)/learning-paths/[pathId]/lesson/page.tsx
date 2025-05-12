@@ -1,11 +1,13 @@
+"use server";
 import React from "react";
 import LessonViewer from "@/components/LessonViewer";
 import { useLesson } from "@/hooks/useLessons";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Lesson, Question } from "@prisma/client";
 
 const LessonPage = () => {
-  const { lessonId } = useParams();
+  const searchParams = useSearchParams();
+  const lessonId = searchParams.get("lessonId");
   const { data } = useLesson(lessonId as string);
 
   if (!data) {
@@ -29,3 +31,4 @@ const LessonPage = () => {
 };
 
 export default LessonPage;
+

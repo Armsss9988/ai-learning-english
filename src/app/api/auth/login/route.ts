@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { LoginCredentials } from '@/types/auth';
-import { compare } from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
-import { sign } from 'jsonwebtoken';
+import { NextResponse } from "next/server";
+import { LoginCredentials } from "@/types/auth";
+import { compare } from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { sign } from "jsonwebtoken";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     if (!isValid) {
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { error: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -34,22 +34,22 @@ export async function POST(request: Request) {
     // Generate JWT token
     const token = sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "7d" }
     );
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
-
+    console.log(_);
     return NextResponse.json({
       user: userWithoutPassword,
       token,
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
-} 
+}
