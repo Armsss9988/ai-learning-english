@@ -1,16 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  request: Request,
-  context: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = context.params; // Corrected destructuring to match Next.js context structure
+    const url = new URL(request.url);
+    const id = url.pathname.split("/").pop();
 
     const learningPath = await prisma.learningPath.findUnique({
       where: {
-        id: id,
+        id: id as string,
       },
       include: {
         lessons: {
