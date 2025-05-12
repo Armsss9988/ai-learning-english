@@ -1,12 +1,11 @@
 import React from "react";
 import LessonViewer from "@/components/LessonViewer";
 import { useLesson } from "@/hooks/useLessons";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import { Lesson, Question } from "@prisma/client";
 
 const LessonPage = () => {
-  const router = useRouter();
-  const { lessonId } = router.query;
+  const { lessonId } = useParams();
   const { data } = useLesson(lessonId as string);
 
   if (!data) {
@@ -17,10 +16,12 @@ const LessonPage = () => {
     <div className="p-4">
       {data && (
         <LessonViewer
-          lesson={{
-            ...data,
-            questions: data.question,
-          } as Lesson & { questions: Question[] }}
+          lesson={
+            {
+              ...data,
+              questions: data.question,
+            } as Lesson & { questions: Question[] }
+          }
         />
       )}
     </div>
