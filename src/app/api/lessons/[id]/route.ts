@@ -1,11 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = await params;
+export async function GET(req: NextRequest) {
+  const id = new URL(req.url).pathname.split("/").pop();
 
   try {
     const lesson = await prisma.lesson.findUnique({
