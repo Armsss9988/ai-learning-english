@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = context.params; // Corrected destructuring to match Next.js context structure
+
     const learningPath = await prisma.learningPath.findUnique({
       where: {
         id: id,
