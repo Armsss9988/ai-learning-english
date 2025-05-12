@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
-import { RegisterData } from '@/types/auth';
-import { hash } from 'bcryptjs';
-import { prisma } from '@/lib/prisma';
-import { sign } from 'jsonwebtoken';
+import { NextResponse } from "next/server";
+import { RegisterData } from "@/types/auth";
+import { hash } from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import { sign } from "jsonwebtoken";
+import { omit } from "lodash";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User already exists' },
+        { error: "User already exists" },
         { status: 400 }
       );
     }
@@ -36,22 +37,22 @@ export async function POST(request: Request) {
     // Generate JWT token
     const token = sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "7d" }
     );
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    const userWithoutPassword = omit(user, "password");
 
     return NextResponse.json({
       user: userWithoutPassword,
       token,
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
-} 
+}

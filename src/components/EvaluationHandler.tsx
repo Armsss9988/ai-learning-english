@@ -1,6 +1,6 @@
-import { useState } from 'react';
+
 import { Modal, Typography, Progress, Space, Button } from 'antd';
-import { Question } from '@/types/learning';
+
 
 const { Title, Text } = Typography;
 

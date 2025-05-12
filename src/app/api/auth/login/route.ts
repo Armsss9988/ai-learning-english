@@ -3,6 +3,7 @@ import { LoginCredentials } from "@/types/auth";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sign } from "jsonwebtoken";
+import { omit } from "lodash";
 
 export async function POST(request: Request) {
   try {
@@ -39,8 +40,7 @@ export async function POST(request: Request) {
     );
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
-    console.log(_);
+    const userWithoutPassword = omit(user, "password");
     return NextResponse.json({
       user: userWithoutPassword,
       token,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button, Input, Card, Typography, Space, message } from 'antd';
 import { LearningPath } from '@prisma/client';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface LearningPathGeneratorProps {
   onLearningPathGenerated: (learningPath: LearningPath) => void;
