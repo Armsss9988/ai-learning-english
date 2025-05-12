@@ -1,4 +1,4 @@
-"use server";
+"use client";
 import React from "react";
 import LessonViewer from "@/components/LessonViewer";
 import { useLesson } from "@/hooks/useLessons";
@@ -31,4 +31,3 @@ const LessonPage = () => {
 };
 
 export default LessonPage;
-
