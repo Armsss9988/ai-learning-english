@@ -3,7 +3,6 @@
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import { useEffect, useState } from "react";
-import { Skeleton } from "antd";
 import { verify } from "@/store/slices/authSlice";
 import api from "@/lib/axios";
 import "@ant-design/v5-patch-for-react-19";
@@ -29,9 +28,7 @@ export function ReduxProvider({ children }: { children: React.ReactNode }) {
     checkUser();
   }, []);
 
-  if (loading) {
-    return <Skeleton active />;
-  }
+  if (loading) return null;
 
   return <Provider store={store}>{children}</Provider>;
 }

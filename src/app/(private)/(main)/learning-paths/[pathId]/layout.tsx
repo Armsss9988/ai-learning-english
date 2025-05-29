@@ -25,7 +25,7 @@ export default async function LearningPathLayout({
   return (
     <div className="container mx-auto px-4 py-8">
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <div className="bg-white shadow-md rounded-lg p-6">{children}</div>
+        {children}
       </HydrationBoundary>
     </div>
   );

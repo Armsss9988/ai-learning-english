@@ -1,35 +1,45 @@
+import React from "react";
+
 export interface FloatButtonProps {
   className?: string;
   onClick?: () => void;
-  top?: number;
-  right?: number;
-  left?: number;
-  bottom?: number;
+  top?: number | string;
+  right?: number | string;
+  bottom?: number | string;
+  left?: number | string;
   title?: string;
   icon?: React.ReactNode;
 }
+
 const FloatButton = ({
-  className,
+  className = "",
   onClick,
   top,
   right,
-  left,
   bottom,
+  left,
   title,
   icon,
 }: FloatButtonProps) => {
+  // Auto generate style to pin to viewport
+  const style: React.CSSProperties = {
+    position: "fixed",
+    top: top !== undefined ? top : undefined,
+    right: right !== undefined ? right : undefined,
+    bottom: bottom !== undefined ? bottom : undefined,
+    left: left !== undefined ? left : undefined,
+  };
+
   return (
     <button
-      className={`hover:scale-105 hover:bg-neutral-400 fixed py-2 px-4 text-white text-md font-bold space-x-2 rounded-lg shadow-lg flex items-center justify-center ${className} ${
-        top ? `top-${top}` : ""
-      } ${right ? `right-${right}` : ""} ${left ? `left-${left}` : ""} ${
-        bottom ? `bottom-${bottom}` : ""
-      }`}
+      style={style}
       onClick={onClick}
+      className={`bg-blue-600 hover:bg-blue-700 transition-transform duration-200 hover:scale-105 text-white px-4 py-2 rounded-full shadow-md flex items-center gap-2 ${className}`}
     >
       {icon}
-      <span>{title}</span>
+      {title && <span>{title}</span>}
     </button>
   );
 };
+
 export default FloatButton;
