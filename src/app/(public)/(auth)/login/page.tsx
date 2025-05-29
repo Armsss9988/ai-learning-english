@@ -1,16 +1,21 @@
 "use client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button, Form, Input, message } from "antd";
+import { useState } from "react";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
+      setLoading(true);
       await login(values);
     } catch {
       messageApi.error("Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,7 +40,13 @@ export default function LoginPage() {
             <Input.Password placeholder="Password" size="large" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" block size="large">
+            <Button
+              loading={loading}
+              type="primary"
+              htmlType="submit"
+              block
+              size="large"
+            >
               Login
             </Button>
           </Form.Item>

@@ -3,7 +3,7 @@ import LearningPathGenerator from "@/components/LearningPathGenerator";
 
 export default async function LearningPathsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 b">
+    <div className="mx-auto px-20 py-8">
       <LearningPathGenerator />
     </div>
   );

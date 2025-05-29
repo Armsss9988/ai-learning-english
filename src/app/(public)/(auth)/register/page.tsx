@@ -2,21 +2,25 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button, Form, Input, message } from "antd";
+import { useState } from "react";
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
-
+  const [loading, setLoading] = useState(false);
   const handleRegister = async (values: {
     name: string;
     email: string;
     password: string;
   }) => {
     try {
+      setLoading(true);
       await register(values);
       messageApi.success("Registered successfully");
     } catch {
       messageApi.error("Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +51,13 @@ export default function RegisterPage() {
             <Input.Password placeholder="Password" size="large" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" block size="large">
+            <Button
+              loading={loading}
+              type="primary"
+              htmlType="submit"
+              block
+              size="large"
+            >
               Register
             </Button>
           </Form.Item>

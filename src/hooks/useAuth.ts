@@ -10,21 +10,6 @@ export function useAuth() {
     (state: RootState) => state.auth
   );
 
-  // const verifyToken = async () => {
-  //   const token = localStorage.getItem("token");
-  //   if (token) {
-  //     try {
-  //       await api.get("/auth/verify");
-  //       dispatch(verify());
-  //     } catch (error) {
-  //       console.error("Error verifying token:", error);
-  //       localStorage.removeItem("token");
-  //       dispatch(verify());
-  //     }
-  //   } else {
-  //     dispatch(setLoading(false));
-  //   }
-  // };
   const login = async ({
     email,
     password,

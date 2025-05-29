@@ -55,8 +55,8 @@ export default function LessonViewer({
                   }}
                   className={`bottom-10 md:bottom-30 left-1/2 -translate-x-1/2 ${
                     passedQuestion.size > questions.length * 0.6
-                      ? "bg-blue-400/50"
-                      : "bg-green-700/50"
+                      ? "bg-blue-400/70"
+                      : "bg-green-700/70"
                   }`}
                   title="Questions"
                   icon={
@@ -66,6 +66,7 @@ export default function LessonViewer({
                 <Drawer
                   title="Questions"
                   placement="top"
+                  className="max-w-3xl mx-auto rounded-2xl "
                   open={drawerOpen}
                   onClose={() => setDrawerOpen(false)}
                   height="100vh"
