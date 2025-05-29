@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Skeleton } from "antd";
 import { verify } from "@/store/slices/authSlice";
 import api from "@/lib/axios";
-
+import "@ant-design/v5-patch-for-react-19";
 export function ReduxProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 

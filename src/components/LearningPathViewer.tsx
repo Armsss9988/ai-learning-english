@@ -113,7 +113,7 @@ export default function LearningPathViewer({
         <Card
           key={index}
           hoverable
-          className={`w-full md:w-[calc(25%-12px)] transition-all duration-300 !text-blue-900  shadow-lg ${
+          className={` w-full md:w-[calc(25%-12px)] transition-all duration-300 !text-blue-900  shadow-lg ${
             isSaved
               ? savedTopics[lessonNumber].isCompleted
                 ? " !shadow-green-600  !bg-gradient-to-tl !from-green-400 !to-gray-50"
@@ -139,7 +139,7 @@ export default function LearningPathViewer({
   );
 
   if (isLessonsLoading) {
-    return <Skeleton active paragraph={{ rows: 6 }} />;
+    return <Skeleton active paragraph={{ rows: 20 }} />;
   }
 
   return (
@@ -164,9 +164,11 @@ export default function LearningPathViewer({
         />
       </Modal>
 
-      <div className="flex justify-between items-center p-10 rounded-2xl shadow-lg shadow-black !bg-gradient-to-tl !from-blue-900 !to-gray-400">
+      <div className="flex flex-col md:flex-row justify-between items-center p-4 md:p-10 rounded-2xl shadow-lg shadow-black !bg-gradient-to-tl !from-blue-900 !to-gray-400">
         <div>
-          <h1 className="text-3xl font-[800]">{learningPath.title}</h1>
+          <h1 className="text-2xl md:text-3xl font-[800]">
+            {learningPath.title}
+          </h1>
           <p className="text-gray-100">{learningPath.description}</p>
         </div>
         {isAuthenticated && !learningPath.id && (
@@ -174,6 +176,7 @@ export default function LearningPathViewer({
             type="primary"
             onClick={showModal}
             loading={savingLearningPath}
+            className="mt-4 md:mt-0"
           >
             Save Learning Path
           </Button>

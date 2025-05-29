@@ -15,7 +15,7 @@ const LessonPage = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="">
       {data && (
         <LessonViewer
           lesson={

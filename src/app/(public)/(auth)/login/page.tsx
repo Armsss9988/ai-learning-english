@@ -2,7 +2,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Button, Form, Input, message } from "antd";
 
-
 export default function LoginPage() {
   const { login } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
@@ -16,7 +15,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className=" flex items-center justify-center bg-gray-50">
       {contextHolder}
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div>

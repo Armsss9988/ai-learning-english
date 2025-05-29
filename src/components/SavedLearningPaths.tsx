@@ -18,13 +18,17 @@ export default function SavedLearningPaths({
 
   return (
     <div className="mt-8">
-      <Title level={3}>Saved Learning Paths</Title>
+      <Title level={3} className="rounded-xl bg-cyan-950/50 px-10">
+        Saved Learning Paths
+      </Title>
       <List
         dataSource={learningPaths}
         renderItem={(path) => (
           <List.Item
-            className={`cursor-pointer !p-4 rounded ${
-              currentLearningPathId == path.id ? "bg-green-500 hover:bg-green-300":"hover:bg-gray-50"
+            className={`rounded-xl bg-cyan-950/10 px-10 cursor-pointer !p-4 my-2 ${
+              currentLearningPathId == path.id
+                ? "bg-green-500/40 hover:bg-green-300/40"
+                : "hover:bg-gray-50"
             }`}
             onClick={() => onLearningPathClick(path)}
           >

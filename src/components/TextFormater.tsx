@@ -199,7 +199,7 @@ const TextFormater = (theory: string) => {
   });
 
   flushList();
-  flushCardSection(); // Ensure closing open card
+  flushCardSection();
 
   function flushList() {
     if (listItems.length > 0) {
@@ -211,7 +211,7 @@ const TextFormater = (theory: string) => {
           {listItems.map((item, idx) => (
             <div
               key={`card-item-${idx}-${Date.now()}-${Math.random()}`}
-              className="p-4 border border-blue-300 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow text-blue-900"
+              className="p-4 border border-blue-300 rounded-xl bg-white shadow-2xl hover:shadow-md hover:bg-gray-100 transition-shadow text-blue-900"
             >
               {isOrderedList ? (
                 <div className="font-bold mb-1">{idx + 1}.</div>
@@ -230,11 +230,11 @@ const TextFormater = (theory: string) => {
       formattedContent.push(
         <motion.div
           key={`card-section-${formattedContent.length}`}
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 200 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.5, type: "spring" }}
-          className="bg-blue-50 p-6 rounded-2xl border-2 border-blue-700 shadow-lg my-6"
+          className="bg-gray-50 hover:bg-blue-50 p-6 rounded-2xl border-2 border-blue-900 shadow-sm my-6 hover:scale-105 hover:shadow-xl transition-transform text-blue-900"
         >
           {cardSectionContent}
         </motion.div>
@@ -274,37 +274,55 @@ const renderInlineFormatting = (text: string): React.ReactNode => {
 
     if (match[2]) {
       parts.push(
-        <strong key={`bold-${lastIndex}-${Math.random()}`} className="text-blue-900">
+        <strong
+          key={`bold-${lastIndex}-${Math.random()}`}
+          className="text-blue-900"
+        >
           {match[2]}
         </strong>
       );
     } else if (match[3]) {
       parts.push(
-        <em key={`italic-${lastIndex}-${Math.random()}`} className="text-blue-700">
+        <em
+          key={`italic-${lastIndex}-${Math.random()}`}
+          className="text-blue-700"
+        >
           {match[3]}
         </em>
       );
     } else if (match[4]) {
       parts.push(
-        <strong key={`bold-${lastIndex}-${Math.random()}`} className="text-blue-900">
+        <strong
+          key={`bold-${lastIndex}-${Math.random()}`}
+          className="text-blue-900"
+        >
           {match[4]}
         </strong>
       );
     } else if (match[5]) {
       parts.push(
-        <em key={`italic-${lastIndex}-${Math.random()}`} className="text-blue-700">
+        <em
+          key={`italic-${lastIndex}-${Math.random()}`}
+          className="text-blue-700"
+        >
           {match[5]}
         </em>
       );
     } else if (match[6]) {
       parts.push(
-        <del key={`strikethrough-${lastIndex}-${Math.random()}`} className="text-gray-500">
+        <del
+          key={`strikethrough-${lastIndex}-${Math.random()}`}
+          className="text-gray-500"
+        >
           {match[6]}
         </del>
       );
     } else if (match[7]) {
       parts.push(
-        <code key={`code-${lastIndex}-${Math.random()}`} className="bg-blue-100 text-blue-900 px-1 rounded">
+        <code
+          key={`code-${lastIndex}-${Math.random()}`}
+          className="bg-blue-100 text-blue-900 px-1 rounded"
+        >
           {match[7]}
         </code>
       );

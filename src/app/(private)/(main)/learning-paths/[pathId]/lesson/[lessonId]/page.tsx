@@ -12,7 +12,7 @@ export default function LessonPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center h-full">
         <Spin size="large" />
       </div>
     );
@@ -28,7 +28,7 @@ export default function LessonPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="">
       <LessonViewer lesson={lesson} />
     </div>
   );

@@ -6,7 +6,7 @@ import { useAppSelector } from "@/store/hooks";
 import { useAuth } from "@/hooks/useAuth";
 import { UserOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function Header() {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
@@ -25,12 +25,14 @@ export default function Header() {
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-blue-900 to-blue-50 shadow-md px-8 py-4 flex justify-between items-center shadow-black">
+    <div
+      onClick={() => router.push("/")}
+      className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-blue-900/50 to-blue-50 shadow-md px-8 py-4 flex justify-between items-center shadow-black"
+    >
       <div className="flex items-center gap-3">
-
-        <Title level={3} className="!mb-0 !text-white">
+        <div className="font-sans !mb-0 text-[#eeeef6] text-xl md:text-4xl hover:!text-blue-900 font-bold cursor-pointer">
           IELTS Learning Path Generator
-        </Title>
+        </div>
       </div>
 
       <div>
@@ -38,15 +40,24 @@ export default function Header() {
           <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
             <div className="flex items-center gap-2 cursor-pointer">
               <Avatar size="large" icon={<UserOutlined />} />
-              <Text strong className="!text-white">{user?.name}</Text>
+              <Text strong className="!text-white">
+                {user?.name}
+              </Text>
             </div>
           </Dropdown>
         ) : (
           <Space>
-            <Button type="text" className="!text-white" onClick={() => router.push("/login")}>
+            <Button
+              type="text"
+              className="!text-white"
+              onClick={() => router.replace("/login")}
+            >
               Login
             </Button>
-            <Button type="primary" className="!rounded-full !bg-white !text-blue-700 hover:!text-blue-900" onClick={() => router.push("/register")}>
+            <Button
+              className="!rounded-full !bg-white !text-blue-700 hover:!text-blue-900"
+              onClick={() => router.replace("/register")}
+            >
               Register
             </Button>
           </Space>

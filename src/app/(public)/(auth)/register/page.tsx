@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button, Form, Input, message } from "antd";
@@ -21,7 +21,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className=" flex items-center justify-center bg-gray-50">
       {contextHolder}
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div>
@@ -55,4 +55,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-} 
+}

@@ -36,12 +36,12 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen bg-gray-600 text-gray-900 font-sans`}
       >
         <ReduxProvider>
           <QueryProvider>
             <Header />
-            {children}
+            <div className="pt-30 h-full">{children}</div>
           </QueryProvider>
         </ReduxProvider>
       </body>

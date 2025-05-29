@@ -20,7 +20,7 @@ export interface SpeechToTextPrombt {
   onRes: (transcript: string) => void;
 }
 export default function SpeechToText({ onRes }: SpeechToTextPrombt) {
-//   const [transcript, setTranscript] = useState("");
+  //   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
   let recognition: SpeechRecognition | null = null;
 
@@ -49,7 +49,7 @@ export default function SpeechToText({ onRes }: SpeechToTextPrombt) {
         const result = event.results[i];
         interimTranscript += result[0].transcript;
       }
-    //   setTranscript(interimTranscript);
+      //   setTranscript(interimTranscript);
       onRes(interimTranscript);
     };
 
@@ -67,24 +67,21 @@ export default function SpeechToText({ onRes }: SpeechToTextPrombt) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* <h1 className="text-2xl font-bold">Speech-to-Text Demo</h1>
-      <p className="p-4 border rounded bg-gray-100 min-h-[100px]">
-        {transcript || "Speak something..."}
-      </p> */}
+
       <div className="flex gap-2">
         {!listening ? (
           <button
             onClick={startListening}
             className="p-2 bg-blue-500 text-white rounded"
           >
-            Start Listening
+            Start Speaking
           </button>
         ) : (
           <button
             onClick={stopListening}
             className="p-2 bg-red-500 text-white rounded"
           >
-            Stop Listening
+            Stop Speaking
           </button>
         )}
       </div>

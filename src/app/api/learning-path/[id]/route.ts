@@ -1,23 +1,13 @@
+// app/api/learning-path/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getLearningPathById } from "@/lib/learningPath";
 
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const id = url.pathname.split("/").pop();
 
-    const learningPath = await prisma.learningPath.findUnique({
-      where: {
-        id: id as string,
-      },
-      include: {
-        lessons: {
-          include: {
-            questions: true,
-          },
-        },
-      },
-    });
+    const learningPath = await getLearningPathById(id as string);
 
     if (!learningPath) {
       return NextResponse.json(
