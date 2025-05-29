@@ -113,7 +113,7 @@ export default function LearningPathViewer({
         <Card
           key={index}
           hoverable
-          className={` w-full md:w-[calc(25%-12px)] transition-all duration-300 !text-blue-900  shadow-lg ${
+          className={`transition-all duration-300 !text-blue-900 shadow-lg ${
             isSaved
               ? savedTopics[lessonNumber].isCompleted
                 ? " !shadow-green-600  !bg-gradient-to-tl !from-green-400 !to-gray-50"
@@ -185,7 +185,7 @@ export default function LearningPathViewer({
 
       <div>
         <h2 className="text-xl font-semibold mb-4">Topics</h2>
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 justify-center">
           {learningPath.topics.map((topic, index) => renderTopic(topic, index))}
         </div>
       </div>

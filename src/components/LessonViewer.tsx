@@ -4,7 +4,7 @@ import {
   CheckCircleOutlined,
   CloseOutlined,
   QuestionCircleOutlined,
-  DownOutlined,
+  UpOutlined,
 } from "@ant-design/icons";
 import TextFormater from "./TextFormater";
 import { Lesson, Question } from "@prisma/client";
@@ -39,7 +39,8 @@ export default function LessonViewer({
       <div className="mx-3 md:mx-10 my-10 bg-[#a19fb7] rounded-xl border-4 border-blue-900 py-10 text-2xl md:text-4xl text-center font-[900] text-blue-950">
         {lesson.title}
       </div>
-      <div className="container mx-auto ">
+
+      <div className="container mx-auto">
         <Card className="!shadow-lg !shadow-blue-900/40 !bg-[#c1d7c3] !rounded-lg !border-0 !my-10">
           <Space direction="vertical" size="large" className="w-full">
             <div className="mt-6">
@@ -49,12 +50,10 @@ export default function LessonViewer({
             {questions.length > 0 && (
               <>
                 <FloatButton
-                  bottom={28}
-                  right={6}
                   onClick={() => {
                     setDrawerOpen(true);
                   }}
-                  className={`${
+                  className={`bottom-10 md:bottom-30 left-1/2 -translate-x-1/2 ${
                     passedQuestion.size > questions.length * 0.6
                       ? "bg-blue-400/50"
                       : "bg-green-700/50"
@@ -75,7 +74,7 @@ export default function LessonViewer({
                       <Button
                         type="default"
                         shape="circle"
-                        icon={<DownOutlined />}
+                        icon={<UpOutlined />}
                         size="large"
                         onClick={() => setDrawerOpen(false)}
                       />
@@ -102,7 +101,7 @@ export default function LessonViewer({
                     ))}
                   </div>
                   <FloatButton
-                    className={`${
+                    className={`bottom-20 md:bottom-30 left-1/2 -translate-x-1/2 ${
                       passedQuestion.size > questions.length * 0.6
                         ? "!bg-blue-400/90"
                         : "!bg-gray-400/70"
@@ -111,8 +110,6 @@ export default function LessonViewer({
                       updateStatus({ lessonId: lesson.id, isCompleted: true });
                     }}
                     title="Finish Lesson"
-                    top={38}
-                    right={6}
                     icon={
                       <CheckCircleOutlined className="!text-green-500/70 text-3xl" />
                     }

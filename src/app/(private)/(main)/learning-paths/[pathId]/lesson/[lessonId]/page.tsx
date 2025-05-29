@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import LessonViewer from "@/components/LessonViewer";
 import { useLesson } from "@/hooks/useLessons";
-import { Spin, message } from "antd";
+import { Skeleton, message } from "antd";
 
 export default function LessonPage() {
   const params = useParams();
@@ -13,7 +13,7 @@ export default function LessonPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <Spin size="large" />
+        <Skeleton active paragraph={{ rows: 20 }} title={true} />
       </div>
     );
   }
@@ -27,9 +27,5 @@ export default function LessonPage() {
     return null;
   }
 
-  return (
-    <div className="">
-      <LessonViewer lesson={lesson} />
-    </div>
-  );
+  return <LessonViewer lesson={lesson} />;
 }

@@ -25,12 +25,12 @@ export default function Header() {
   ];
 
   return (
-    <div
-      onClick={() => router.push("/")}
-      className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-blue-900/50 to-blue-50 shadow-md px-8 py-4 flex justify-between items-center shadow-black"
-    >
+    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-blue-900/50 to-blue-50 shadow-md px-8 py-4 flex justify-between items-center shadow-black">
       <div className="flex items-center gap-3">
-        <div className="font-sans !mb-0 text-[#eeeef6] text-xl md:text-4xl hover:!text-blue-900 font-bold cursor-pointer">
+        <div
+          onClick={() => router.push("/")}
+          className="font-sans !mb-0 text-[#eeeef6] text-xl md:text-4xl hover:!text-blue-900 font-bold cursor-pointer"
+        >
           IELTS Learning Path Generator
         </div>
       </div>
@@ -50,13 +50,13 @@ export default function Header() {
             <Button
               type="text"
               className="!text-white"
-              onClick={() => router.replace("/login")}
+              onClick={() => router.push("/login")}
             >
               Login
             </Button>
             <Button
               className="!rounded-full !bg-white !text-blue-700 hover:!text-blue-900"
-              onClick={() => router.replace("/register")}
+              onClick={() => router.push("/register")}
             >
               Register
             </Button>

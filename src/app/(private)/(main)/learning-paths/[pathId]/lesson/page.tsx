@@ -15,18 +15,14 @@ const LessonPage = () => {
   }
 
   return (
-    <div className="">
-      {data && (
-        <LessonViewer
-          lesson={
-            {
-              ...data,
-              questions: data.question,
-            } as Lesson & { questions: Question[] }
-          }
-        />
-      )}
-    </div>
+    <LessonViewer
+      lesson={
+        {
+          ...data,
+          questions: data.question,
+        } as Lesson & { questions: Question[] }
+      }
+    />
   );
 };
 
