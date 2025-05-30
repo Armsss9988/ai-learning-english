@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/hooks/useRouter";
 import { setUser, logout } from "@/store/slices/authSlice";
 import api from "@/lib/axios";
 import { RootState } from "@/store/store";

@@ -1,4 +1,3 @@
-"use server";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -7,6 +6,10 @@ import Header from "@/components/Header";
 import { ReduxProvider } from "@/providers/ReduxProvider";
 import AIChatbot from "@/components/AIChatbot";
 import AuthInitializer from "@/components/AuthInitializer";
+import { NavigationProvider } from "@/providers/NavigationProvider";
+import { Suspense } from "react";
+import { Spin } from "antd";
+import { BookOutlined } from "@ant-design/icons";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +27,26 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       "AI Learning English - Master IELTS with AI-powered learning paths",
   };
+}
+
+// Loading component for Suspense fallback
+function AppLoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="relative">
+          <BookOutlined className="text-6xl text-emerald-500 animate-pulse" />
+        </div>
+        <Spin size="large" />
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-gray-700">
+            AI Learning English
+          </h3>
+          <p className="text-gray-500">Initializing application...</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default async function RootLayout({
@@ -47,14 +70,20 @@ export default async function RootLayout({
           minHeight: "100vh",
         }}
       >
-        <ReduxProvider>
-          <QueryProvider>
-            <AuthInitializer />
-            <Header />
-            <div className="pt-24 min-h-screen animate-fade-in">{children}</div>
-            <AIChatbot />
-          </QueryProvider>
-        </ReduxProvider>
+        <Suspense fallback={<AppLoadingFallback />}>
+          <ReduxProvider>
+            <QueryProvider>
+              <NavigationProvider>
+                <AuthInitializer />
+                <Header />
+                <div className="pt-24 min-h-screen animate-fade-in">
+                  {children}
+                </div>
+                <AIChatbot />
+              </NavigationProvider>
+            </QueryProvider>
+          </ReduxProvider>
+        </Suspense>
       </body>
     </html>
   );
