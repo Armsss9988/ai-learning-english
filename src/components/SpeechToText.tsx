@@ -67,19 +67,18 @@ export default function SpeechToText({ onRes }: SpeechToTextPrombt) {
 
   return (
     <div className="flex flex-col gap-4">
-
       <div className="flex gap-2">
         {!listening ? (
           <button
             onClick={startListening}
-            className="p-2 bg-blue-500 text-white rounded"
+            className="p-2 bg-gradient-to-br from-amber-200 to-green-500 text-white rounded"
           >
             Start Speaking
           </button>
         ) : (
           <button
             onClick={stopListening}
-            className="p-2 bg-red-500 text-white rounded"
+            className="p-2 bg-gradient-to-br from-red-500 to-green-500/40 text-white rounded"
           >
             Stop Speaking
           </button>

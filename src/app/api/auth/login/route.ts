@@ -1,35 +1,51 @@
-import { NextResponse } from "next/server";
 import { LoginCredentials } from "@/types/auth";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sign } from "jsonwebtoken";
 import { omit } from "lodash";
+import {
+  ApiSuccess,
+  ApiError,
+  apiHandler,
+  validateRequired,
+} from "@/utils/apiResponse";
+import { API_MESSAGE } from "@/constants/apiCode";
 
 export async function POST(request: Request) {
-  try {
+  return apiHandler(async () => {
     const body: LoginCredentials = await request.json();
     const { email, password } = body;
 
-    // Find user
+    // Validate required fields
+    const validationErrors = validateRequired({ email, password });
+    if (validationErrors.length > 0) {
+      return ApiError.validation(
+        API_MESSAGE.VALIDATION_ERROR,
+        validationErrors
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return ApiError.validation(API_MESSAGE.INVALID_EMAIL_FORMAT, [
+        "Invalid email format",
+      ]);
+    }
+
+    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
+      return ApiError.invalidCredentials();
     }
 
     // Verify password
     const isValid = await compare(password, user.password);
-
     if (!isValid) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
+      return ApiError.invalidCredentials();
     }
 
     // Generate JWT token
@@ -41,15 +57,11 @@ export async function POST(request: Request) {
 
     // Remove password from response
     const userWithoutPassword = omit(user, "password");
-    return NextResponse.json({
+
+    // Return success response with user data and token
+    return ApiSuccess.login({
       user: userWithoutPassword,
       token,
     });
-  } catch (error) {
-    console.error("Login error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+  });
 }

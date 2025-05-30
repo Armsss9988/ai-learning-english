@@ -194,7 +194,11 @@ const QuestionCard = memo(({ question, index, onPass }: QuestionCardProps) => {
         icon={<CheckOutlined />}
         onClick={checkAnswer}
         disabled={!!isCorrect}
-        className="mt-4"
+        className="mt-4 !rounded-xl"
+        style={{
+          background: "linear-gradient(135deg, #059669 0%, #d97706 100%)",
+          border: "none",
+        }}
       >
         Check Answer
       </Button>
@@ -207,43 +211,87 @@ const QuestionCard = memo(({ question, index, onPass }: QuestionCardProps) => {
       <Alert
         message="Explanation"
         description={question.explanation}
-        type="info"
+        type={isCorrect ? "success" : "error"}
         showIcon
-        className={`!mt-4 ${isCorrect ? "!bg-green-300" : "!bg-red-200"}`}
+        className="!mt-4 !rounded-xl"
+        style={{
+          backgroundColor: isCorrect ? "#d1fae5" : "#fef2f2",
+          borderColor: isCorrect ? "#10b981" : "#ef4444",
+        }}
       />
     );
   };
 
   return (
-    <Card className="!mb-4 !bg-blue-100">
-      <Title level={4}>Question {index + 1}</Title>
-      <Title level={5}>{question.question}</Title>
+    <Card
+      className="!mb-6 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+      style={{
+        borderRadius: "20px",
+        background:
+          "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(236, 253, 245, 0.8) 100%)",
+        backdropFilter: "blur(10px)",
+      }}
+    >
+      <div className="p-2">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-amber-500 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-sm">{index + 1}</span>
+          </div>
+          <Title level={4} className="!text-stone-800 !mb-0">
+            Question {index + 1}
+          </Title>
+        </div>
 
-      {question.evaluationCriteria?.length > 0 && (
-        <Card title="Criteria" className="!my-4 !bg-blue-50">
-          {question.evaluationCriteria.map((crit) => (
-            <Typography key={crit} className="!font-bold !text-blue-900">
-              {crit}
-            </Typography>
-          ))}
-        </Card>
-      )}
+        <div className="bg-white/70 rounded-xl p-4 mb-4 border border-emerald-100">
+          <Title level={5} className="!text-stone-700 !mb-3">
+            {question.question}
+          </Title>
+        </div>
 
-      {question.audioText && (
-        <Button
-          type="dashed"
-          icon={<SoundOutlined />}
-          onClick={() => {
-            const utterance = new SpeechSynthesisUtterance(question.audioText!);
-            window.speechSynthesis.speak(utterance);
-          }}
-          className="mb-4"
-        >
-          Play Audio
-        </Button>
-      )}
+        {question.evaluationCriteria?.length > 0 && (
+          <Card
+            title={
+              <span className="text-emerald-700 font-semibold">
+                📋 Evaluation Criteria
+              </span>
+            }
+            className="!my-4 border-0 shadow-sm"
+            style={{
+              borderRadius: "16px",
+              background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+            }}
+          >
+            <div className="space-y-2">
+              {question.evaluationCriteria.map((crit) => (
+                <div key={crit} className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                  <Typography className="!font-medium !text-stone-700">
+                    {crit}
+                  </Typography>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
-      {renderInput()}
+        {question.audioText && (
+          <Button
+            type="default"
+            icon={<SoundOutlined />}
+            onClick={() => {
+              const utterance = new SpeechSynthesisUtterance(
+                question.audioText!
+              );
+              window.speechSynthesis.speak(utterance);
+            }}
+            className="mb-4 !rounded-xl !border-emerald-300 hover:!border-emerald-500 hover:!text-emerald-600"
+          >
+            🔊 Play Audio
+          </Button>
+        )}
+
+        <div className="mt-4">{renderInput()}</div>
+      </div>
     </Card>
   );
 });

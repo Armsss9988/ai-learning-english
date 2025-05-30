@@ -13,10 +13,16 @@ export default function PublicLayout({
   const router = useRouter();
 
   useEffect(() => {
+    // Only redirect if not loading and authenticated
     if (!loading && isAuthenticated) {
       router.replace("/learning-paths");
     }
   }, [isAuthenticated, loading, router]);
+
+  // While loading, show the children (no redirect yet)
+  if (loading) {
+    return <div>{children}</div>;
+  }
 
   return <div>{children}</div>;
 }

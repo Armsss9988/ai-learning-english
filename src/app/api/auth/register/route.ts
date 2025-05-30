@@ -1,14 +1,44 @@
-import { NextResponse } from "next/server";
 import { RegisterData } from "@/types/auth";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sign } from "jsonwebtoken";
 import { omit } from "lodash";
+import {
+  ApiSuccess,
+  ApiError,
+  apiHandler,
+  validateRequired,
+} from "@/utils/apiResponse";
+import { API_MESSAGE } from "@/constants/apiCode";
 
 export async function POST(request: Request) {
-  try {
+  return apiHandler(async () => {
     const body: RegisterData = await request.json();
     const { email, password, name } = body;
+
+    // Validate required fields
+    const validationErrors = validateRequired({ email, password, name });
+    if (validationErrors.length > 0) {
+      return ApiError.validation(
+        API_MESSAGE.VALIDATION_ERROR,
+        validationErrors
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return ApiError.validation(API_MESSAGE.INVALID_EMAIL_FORMAT, [
+        "Invalid email format",
+      ]);
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return ApiError.validation(API_MESSAGE.PASSWORD_TOO_SHORT, [
+        "Password must be at least 6 characters",
+      ]);
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -16,10 +46,7 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      );
+      return ApiError.emailExists();
     }
 
     // Hash password
@@ -44,15 +71,10 @@ export async function POST(request: Request) {
     // Remove password from response
     const userWithoutPassword = omit(user, "password");
 
-    return NextResponse.json({
+    // Return success response
+    return ApiSuccess.register({
       user: userWithoutPassword,
       token,
     });
-  } catch (error) {
-    console.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+  });
 }
