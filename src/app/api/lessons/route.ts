@@ -50,8 +50,8 @@ export async function POST(req: Request) {
       "questions": [
         {
           "question": string,
-          "type": only in "multiple_choice" | "essay" | "speaking" | "categorization" | "highlighting",
-          "options": JSON (for multiple_choice, categorization, and highlighting only),
+          "type": only in "multiple_choice" | "essay" | "speaking" | "categorization",
+          "options": JSON (for multiple_choice, categorization only),
           "correctAnswer": string,
           "explanation": string,
           "evaluationCriteria": string[] (for essay and speaking),
@@ -83,6 +83,7 @@ export async function POST(req: Request) {
     });
 
     const data = await response.json();
+    console.log(data);
     const content = data.candidates[0].content.parts[0].text;
 
     if (!content) {

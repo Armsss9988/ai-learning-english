@@ -94,7 +94,7 @@ export default function LearningPathGenerator() {
 
               <div className="space-y-3">
                 <Text strong className="text-stone-700 flex items-center gap-2">
-                  <TrophyOutlined className="text-emerald-600" />
+                  <TrophyOutlined className="text-emerald-600 !mr-1" />
                   Target IELTS Level
                 </Text>
                 <Input

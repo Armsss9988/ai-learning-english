@@ -7,9 +7,11 @@ import { ReduxProvider } from "@/providers/ReduxProvider";
 import AIChatbot from "@/components/AIChatbot";
 import AuthInitializer from "@/components/AuthInitializer";
 import { NavigationProvider } from "@/providers/NavigationProvider";
+import { ChatbotProvider } from "@/providers/ChatbotProvider";
 import { Suspense } from "react";
 import { Spin } from "antd";
 import { BookOutlined } from "@ant-design/icons";
+import MainLayout from "@/components/MainLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,6 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "AI Learning English",
     description:
       "AI Learning English - Master IELTS with AI-powered learning paths",
+    icons: {
+      icon: "/icon.svg",
+    },
   };
 }
 
@@ -74,12 +79,12 @@ export default async function RootLayout({
           <ReduxProvider>
             <QueryProvider>
               <NavigationProvider>
-                <AuthInitializer />
-                <Header />
-                <div className="pt-24 min-h-screen animate-fade-in">
-                  {children}
-                </div>
-                <AIChatbot />
+                <ChatbotProvider>
+                  <AuthInitializer />
+                  <Header />
+                  <MainLayout>{children}</MainLayout>
+                  <AIChatbot />
+                </ChatbotProvider>
               </NavigationProvider>
             </QueryProvider>
           </ReduxProvider>

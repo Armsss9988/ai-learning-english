@@ -14,10 +14,10 @@ export default function Header() {
   const router = useRouter();
 
   const menuItems: MenuProps["items"] = [
-    {
-      key: "profile",
-      label: <span onClick={() => router.push("/profile")}>Profile</span>,
-    },
+    // {
+    //   key: "profile",
+    //   label: <span onClick={() => router.push("/profile")}>Profile</span>,
+    // },
     {
       key: "logout",
       label: <span onClick={logout}>Logout</span>,

@@ -35,9 +35,9 @@ export default function Drawers() {
           top: 100,
           right: 24,
         }}
-        className="!w-30 !h-10"
+        className="!w-35 !h-10"
         onClick={toggleDrawer}
-        description="Learning Paths"
+        description="Your Learning Paths"
         shape="square"
       ></FloatButton>
       {!drawerOpen && (

@@ -193,3 +193,103 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out;
 }
+
+/* Custom styles for markdown in chatbot */
+.chatbot-markdown {
+  @apply text-sm leading-relaxed;
+}
+
+.chatbot-markdown p {
+  @apply mb-2 last:mb-0;
+}
+
+.chatbot-markdown ul,
+.chatbot-markdown ol {
+  @apply mb-2 ml-4;
+}
+
+.chatbot-markdown li {
+  @apply mb-1;
+}
+
+.chatbot-markdown code {
+  @apply bg-emerald-50 text-emerald-700 px-1 py-0.5 rounded text-xs font-mono;
+}
+
+.chatbot-markdown pre {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-3 overflow-x-auto my-2 text-xs;
+}
+
+.chatbot-markdown blockquote {
+  @apply border-l-4 border-emerald-500 pl-3 py-1 bg-emerald-50 rounded-r-lg my-2 italic;
+}
+
+.chatbot-markdown h1,
+.chatbot-markdown h2,
+.chatbot-markdown h3 {
+  @apply font-semibold text-stone-800 mb-1;
+}
+
+.chatbot-markdown h1 {
+  @apply text-base;
+}
+
+.chatbot-markdown h2 {
+  @apply text-sm;
+}
+
+.chatbot-markdown h3 {
+  @apply text-xs;
+}
+
+.chatbot-markdown a {
+  @apply text-emerald-600 hover:text-emerald-800 underline;
+}
+
+.chatbot-markdown strong {
+  @apply font-semibold text-stone-800;
+}
+
+.chatbot-markdown em {
+  @apply italic text-stone-600;
+}
+
+/* Table styles for markdown */
+.chatbot-markdown table {
+  @apply border-collapse border border-gray-300 text-xs my-2;
+}
+
+.chatbot-markdown th,
+.chatbot-markdown td {
+  @apply border border-gray-300 px-2 py-1 text-left;
+}
+
+.chatbot-markdown th {
+  @apply bg-gray-100 font-semibold;
+}
+
+/* Ant Design tooltip z-index fix */
+.ant-tooltip {
+  z-index: 2200 !important;
+}
+
+/* Ant Design dropdown z-index fix */
+.ant-dropdown {
+  z-index: 2200 !important;
+}
+
+/* Ant Design popover z-index fix */
+.ant-popover {
+  z-index: 2200 !important;
+}
+
+/* Chatbot resize cursor */
+.chatbot-resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+/* Smooth transitions for main content */
+.main-content-transition {
+  transition: margin-right 0.3s ease-in-out;
+}
