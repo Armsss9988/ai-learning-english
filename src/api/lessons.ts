@@ -35,10 +35,12 @@ export const lessonsApi = {
     criteria: string[],
     questionType: string,
     answer?: string,
-    audio?: string
+    audio?: string,
+    questionContent?: string
   ) => {
     const response = await axiosInstance.post("/evaluate", {
       questionId,
+      questionContent,
       answer,
       criteria,
       questionType,
@@ -63,10 +65,13 @@ export const lessonsApi = {
   },
 
   updateStatus: async (lessonId: string, isCompleted: boolean) => {
-    const response = await axiosInstance.patch<Lesson>("/lessons/updateStatus", {
-      lessonId,
-      isCompleted,
-    });
+    const response = await axiosInstance.patch<Lesson>(
+      "/lessons/updateStatus",
+      {
+        lessonId,
+        isCompleted,
+      }
+    );
     return response.data;
   },
 };

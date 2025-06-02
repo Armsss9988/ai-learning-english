@@ -19,6 +19,7 @@ interface ChatResponse {
   response: string;
   hasLessonContext: boolean;
   lessonTitle?: string;
+  sessionId: string;
 }
 
 export function useChatbot() {
@@ -32,9 +33,10 @@ export function useChatbot() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const sendMessage = useCallback(
-    async (text: string, lessonId?: string): Promise<void> => {
+    async (text: string): Promise<void> => {
       if (!text.trim()) return;
 
       // Add user message
@@ -43,7 +45,9 @@ export function useChatbot() {
         sender: "user",
         text: text.trim(),
         timestamp: new Date(),
-        lessonContext: lessonId ? { lessonId, lessonTitle: "" } : undefined,
+        lessonContext: currentLessonId
+          ? { lessonId: currentLessonId, lessonTitle: "" }
+          : undefined,
       };
 
       setMessages((prev) => [...prev, userMessage]);
@@ -52,12 +56,17 @@ export function useChatbot() {
       try {
         const response = await api.post("/chat", {
           message: text.trim(),
-          lessonId: lessonId || currentLessonId,
+          lessonId: currentLessonId, // Send lessonId directly
+          sessionId: sessionId,
+          userId: "current-user", // TODO: Get from auth context
         });
 
         const apiResponse: ApiResponse<ChatResponse> = response.data;
 
         if (apiResponse.status === "success" && apiResponse.data) {
+          // Update sessionId
+          setSessionId(apiResponse.data.sessionId);
+
           const botMessage: ChatMessage = {
             id: `bot_${Date.now()}`,
             sender: "bot",
@@ -65,7 +74,7 @@ export function useChatbot() {
             timestamp: new Date(),
             lessonContext: apiResponse.data.hasLessonContext
               ? {
-                  lessonId: lessonId || currentLessonId || "",
+                  lessonId: currentLessonId || "",
                   lessonTitle: apiResponse.data.lessonTitle || "",
                 }
               : undefined,
@@ -91,23 +100,29 @@ export function useChatbot() {
         setIsLoading(false);
       }
     },
-    [currentLessonId]
+    [currentLessonId, sessionId]
   );
 
   const setLessonContext = useCallback((lessonId: string | null) => {
+    if (!lessonId) {
+      setCurrentLessonId(null);
+      // Don't reset sessionId - keep conversation memory
+      return;
+    }
+
+    console.log(`🎯 Setting lesson context: ${lessonId}`);
     setCurrentLessonId(lessonId);
 
-    if (lessonId) {
-      const contextMessage: ChatMessage = {
-        id: `context_${Date.now()}`,
-        sender: "bot",
-        text: "Tôi đã tải ngữ cảnh bài học. Bây giờ bạn có thể hỏi tôi về nội dung bài học này!",
-        timestamp: new Date(),
-        lessonContext: { lessonId, lessonTitle: "" },
-      };
+    // Add context message when lesson changes
+    const contextMessage: ChatMessage = {
+      id: `context_${Date.now()}`,
+      sender: "bot",
+      text: "🎯 Tôi đã cập nhật ngữ cảnh bài học. Bây giờ bạn có thể hỏi tôi về nội dung bài này!",
+      timestamp: new Date(),
+      lessonContext: { lessonId, lessonTitle: "" },
+    };
 
-      setMessages((prev) => [...prev, contextMessage]);
-    }
+    setMessages((prev) => [...prev, contextMessage]);
   }, []);
 
   const clearMessages = useCallback(() => {
@@ -120,12 +135,14 @@ export function useChatbot() {
       },
     ]);
     setCurrentLessonId(null);
+    setSessionId(null);
   }, []);
 
   return {
     messages,
     isLoading,
     currentLessonId,
+    sessionId,
     sendMessage,
     setLessonContext,
     clearMessages,

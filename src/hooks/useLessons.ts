@@ -40,18 +40,27 @@ export const useEvaluateResponse = () => {
   return useMutation({
     mutationFn: ({
       questionId,
+      questionContent,
       answer,
       audio,
       criteria,
       questionType,
     }: {
       questionId: string;
+      questionContent?: string;
       answer?: string;
       audio?: string;
       criteria: string[];
       questionType: string;
     }) =>
-      lessonsApi.evaluate(questionId, criteria, questionType, answer, audio),
+      lessonsApi.evaluate(
+        questionId,
+        criteria,
+        questionType,
+        answer,
+        audio,
+        questionContent
+      ),
   });
 };
 
@@ -65,8 +74,13 @@ export const useUpdateLessonStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ lessonId, isCompleted }: { lessonId: string; isCompleted: boolean }) =>
-      lessonsApi.updateStatus(lessonId, isCompleted),
+    mutationFn: ({
+      lessonId,
+      isCompleted,
+    }: {
+      lessonId: string;
+      isCompleted: boolean;
+    }) => lessonsApi.updateStatus(lessonId, isCompleted),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lessons"] });
     },
