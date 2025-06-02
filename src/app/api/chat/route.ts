@@ -2,16 +2,67 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableSequence } from "@langchain/core/runnables";
+import { ConversationSummaryBufferMemory } from "langchain/memory";
+import { ChatMessageHistory } from "langchain/stores/message/in_memory";
 import { ApiSuccess, ApiError, apiHandler } from "@/utils/apiResponse";
 import { prisma } from "@/lib/prisma";
 
 interface ChatRequest {
   message: string;
   lessonId?: string;
+  sessionId?: string;
   userId?: string;
 }
 
-// Initialize the LLM with Gemini
+interface ChatResponse {
+  response: string;
+  hasLessonContext: boolean;
+  lessonTitle?: string;
+  sessionId: string;
+}
+
+interface LessonData {
+  id: string;
+  title: string;
+  theory: string | null;
+  questions: Array<{
+    id: string;
+    question: string;
+    type: string;
+    options: unknown;
+    correctAnswer: string | null;
+    explanation: string | null;
+  }>;
+}
+
+interface SessionData {
+  memory: ConversationSummaryBufferMemory;
+  lessonContext: LessonData | null;
+  timestamp: number;
+  userId?: string;
+}
+
+// =============================================================================
+// SHARED SESSION STORE WITH CONVERSATION MEMORY
+// =============================================================================
+
+declare global {
+  // eslint-disable-next-line no-var
+  var sessionStore: Map<string, SessionData>;
+}
+
+if (!global.sessionStore) {
+  global.sessionStore = new Map<string, SessionData>();
+}
+
+const sessionStore = global.sessionStore;
+const SESSION_TTL = 30 * 60 * 1000; // 30 minutes
+const MAX_SESSIONS = 1000;
+
+// =============================================================================
+// LLM CONFIGURATION
+// =============================================================================
+
 const llm = new ChatGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
   model: "gemini-2.0-flash",
@@ -19,171 +70,241 @@ const llm = new ChatGoogleGenerativeAI({
   maxOutputTokens: 2048,
 });
 
-// Create a prompt template for lesson-aware conversations
-const lessonAwarePrompt = PromptTemplate.fromTemplate(`
-Bạn là trợ lý AI cho một nền tảng học IELTS. Vai trò của bạn là giúp học sinh với nội dung bài học và chuẩn bị IELTS.
+const outputParser = new StringOutputParser();
 
-NGỮ CẢNH BÀI HỌC:
-Tiêu đề: {lessonTitle}
+// =============================================================================
+// CONCISE PROMPTS
+// =============================================================================
+
+const lessonAwarePrompt = PromptTemplate.fromTemplate(`
+Bạn là AI trợ lý IELTS. Bối cảnh bài học:
+
+**{lessonTitle}**
 Lý thuyết: {lessonTheory}
 Câu hỏi: {lessonQuestions}
 
-QUY TẮC TRUYỆN THOẠI:
-1. Chỉ trả lời các câu hỏi liên quan đến:
-   - Nội dung bài học hiện tại
-   - Chiến lược chuẩn bị IELTS
-   - Học tiếng Anh
-   - Ngữ pháp, từ vựng, nói, viết, đọc, nghe
+Trả lời ngắn gọn, tập trung vào bài học. Khi được hỏi về "câu 1", "câu 2"... thì trả lời về câu hỏi tương ứng trong danh sách.
 
-2. Nếu người dùng hỏi về các chủ đề không liên quan đến IELTS hoặc học tiếng Anh, hãy trả lời:
-   "Xin lỗi, tôi chỉ có thể hỗ trợ các câu hỏi liên quan đến IELTS và nội dung bài học. Bạn có thể hỏi tôi về bài học hiện tại hoặc các kỹ năng IELTS khác."
+Lịch sử: {history}
+Người dùng: {input}
+AI:`);
 
-3. Hãy hữu ích, khuyến khích và cung cấp giải thích chi tiết khi thảo luận về nội dung bài học.
+const generalPrompt = PromptTemplate.fromTemplate(`
+Bạn là AI trợ lý IELTS. Chỉ trả lời về IELTS và tiếng Anh.
 
-4. Luôn trả lời bằng tiếng Việt một cách tự nhiên và dễ hiểu.
+Lịch sử: {history}  
+Người dùng: {input}
+AI:`);
 
-CÂU HỎI CỦA NGƯỜI DÙNG: {question}
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
 
-TRẢ LỜI:`);
+function generateSessionId(userId?: string): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substr(2, 9);
+  return `${userId || "anon"}_${timestamp}_${random}`;
+}
 
-// Create a prompt for general IELTS conversations (when no lesson context)
-const generalIELTSPrompt = PromptTemplate.fromTemplate(`
-Bạn là trợ lý AI cho một nền tảng học IELTS. Vai trò của bạn là giúp học sinh chuẩn bị IELTS.
+function formatLessonContent(lesson: LessonData): {
+  theory: string;
+  questions: string;
+} {
+  const theory = lesson.theory
+    ? lesson.theory.length > 1000
+      ? lesson.theory.substring(0, 1000) + "..."
+      : lesson.theory
+    : "Không có lý thuyết";
 
-QUY TẮC TRUYỆN THOẠI:
-1. Chỉ trả lời các câu hỏi liên quan đến:
-   - Chiến lược chuẩn bị IELTS
-   - Học tiếng Anh
-   - Ngữ pháp, từ vựng, nói, viết, đọc, nghe
-   - Mẹo và kỹ thuật học tập
+  const questions =
+    lesson.questions.length > 0
+      ? lesson.questions
+          .map(
+            (q, i) =>
+              `${i + 1}. ${q.question} ${
+                q.correctAnswer ? `(Đáp án: ${q.correctAnswer})` : ""
+              }`
+          )
+          .join(" | ")
+      : "Không có câu hỏi";
 
-2. Nếu người dùng hỏi về các chủ đề không liên quan đến IELTS hoặc học tiếng Anh, hãy trả lời:
-   "Xin lỗi, tôi chỉ có thể hỗ trợ các câu hỏi liên quan đến IELTS và học tiếng Anh. Bạn có câu hỏi nào về IELTS không?"
+  return { theory, questions };
+}
 
-3. Hãy hữu ích, khuyến khích và cung cấp lời khuyên thực tế cho việc chuẩn bị IELTS.
+async function createMemory(): Promise<ConversationSummaryBufferMemory> {
+  return new ConversationSummaryBufferMemory({
+    llm,
+    maxTokenLimit: 1000,
+    returnMessages: false,
+    inputKey: "input",
+    outputKey: "output",
+    chatHistory: new ChatMessageHistory(),
+  });
+}
 
-4. Luôn trả lời bằng tiếng Việt một cách tự nhiên và dễ hiểu.
+async function getOrCreateSession(
+  sessionId?: string,
+  userId?: string,
+  lessonId?: string
+): Promise<{ sessionId: string; data: SessionData }> {
+  let finalSessionId = sessionId;
 
-CÂU HỎI CỦA NGƯỜI DÙNG: {question}
+  if (!finalSessionId) {
+    finalSessionId = generateSessionId(userId);
+  }
 
-TRẢ LỜI:`);
+  let sessionData = sessionStore.get(finalSessionId);
 
-const outputParser = new StringOutputParser();
+  if (!sessionData) {
+    const memory = await createMemory();
+    sessionData = {
+      memory,
+      lessonContext: null,
+      timestamp: Date.now(),
+      userId,
+    };
+    sessionStore.set(finalSessionId, sessionData);
+    console.log(`🆕 Created session: ${finalSessionId}`);
+  }
+
+  // Update lesson context if lessonId provided and different
+  if (
+    lessonId &&
+    (!sessionData.lessonContext || sessionData.lessonContext.id !== lessonId)
+  ) {
+    try {
+      const lesson = await prisma.lesson.findUnique({
+        where: { id: lessonId },
+        include: {
+          questions: {
+            select: {
+              id: true,
+              question: true,
+              type: true,
+              options: true,
+              correctAnswer: true,
+              explanation: true,
+            },
+          },
+        },
+      });
+
+      if (lesson) {
+        sessionData.lessonContext = lesson;
+        console.log(`🎯 Updated lesson context: ${lesson.title}`);
+      }
+    } catch (error) {
+      console.error("Error fetching lesson:", error);
+    }
+  }
+
+  sessionData.timestamp = Date.now();
+  return { sessionId: finalSessionId, data: sessionData };
+}
+
+// Cleanup function
+function cleanupSessions() {
+  const now = Date.now();
+  const expired: string[] = [];
+
+  sessionStore.forEach((data, sessionId) => {
+    if (now - data.timestamp > SESSION_TTL) {
+      expired.push(sessionId);
+    }
+  });
+
+  expired.forEach((sessionId) => sessionStore.delete(sessionId));
+
+  if (sessionStore.size > MAX_SESSIONS) {
+    const oldest = Array.from(sessionStore.entries())
+      .sort((a, b) => a[1].timestamp - b[1].timestamp)
+      .slice(0, sessionStore.size - MAX_SESSIONS);
+
+    oldest.forEach(([sessionId]) => sessionStore.delete(sessionId));
+  }
+}
+
+setInterval(cleanupSessions, 5 * 60 * 1000);
+
+// =============================================================================
+// MAIN CHAT HANDLER
+// =============================================================================
 
 export async function POST(request: Request) {
   return apiHandler(async () => {
     try {
       const body: ChatRequest = await request.json();
-      const { message, lessonId } = body;
+      const { message, lessonId, sessionId, userId } = body;
+
+      console.log(`💬 Chat request:`, {
+        message: message?.substring(0, 50) + "...",
+        lessonId,
+        sessionId,
+        sessionStoreSize: sessionStore.size,
+      });
 
       if (!message?.trim()) {
         return ApiError.badRequest("Message is required");
       }
 
-      let lessonContext = null;
+      // Get or create session with lesson context
+      const { sessionId: finalSessionId, data: sessionData } =
+        await getOrCreateSession(sessionId, userId, lessonId);
 
-      // If lessonId is provided, fetch lesson data
-      if (lessonId) {
-        try {
-          lessonContext = await prisma.lesson.findUnique({
-            where: { id: lessonId },
-            include: {
-              questions: {
-                select: {
-                  id: true,
-                  question: true,
-                  type: true,
-                  options: true,
-                  correctAnswer: true,
-                  explanation: true,
-                },
-              },
-            },
-          });
+      let response: string;
+      let hasLessonContext = false;
+      let lessonTitle: string | undefined;
 
-          // Debug log để kiểm tra data
-          console.log("Lesson context fetched:", {
-            lessonId,
-            title: lessonContext?.title,
-            theoryLength: lessonContext?.theory?.length,
-            questionsCount: lessonContext?.questions?.length,
-          });
-        } catch (error) {
-          console.error("Error fetching lesson:", error);
-          lessonContext = null;
-        }
-      }
+      if (sessionData.lessonContext) {
+        // Use lesson-aware prompt with conversation memory
+        const { theory, questions } = formatLessonContent(
+          sessionData.lessonContext
+        );
 
-      let chain: RunnableSequence;
+        const history = await sessionData.memory.loadMemoryVariables({});
 
-      if (lessonContext) {
-        // Create lesson-aware chain với data validation
-        let questionsText = "Chưa có câu hỏi cho bài học này.";
+        const chain = RunnableSequence.from([
+          lessonAwarePrompt,
+          llm,
+          outputParser,
+        ]);
 
-        if (lessonContext.questions && lessonContext.questions.length > 0) {
-          questionsText = lessonContext.questions
-            .map((q, index) => {
-              const optionsText =
-                q.options && typeof q.options === "object"
-                  ? Object.entries(q.options as Record<string, string>)
-                      .map(([key, value]) => `   ${key}: ${value}`)
-                      .join("\n")
-                  : "";
-
-              return `${index + 1}. ${q.question}
-${optionsText ? `   Lựa chọn:\n${optionsText}` : ""}
-${q.correctAnswer ? `   Đáp án đúng: ${q.correctAnswer}` : ""}
-${q.explanation ? `   Giải thích: ${q.explanation}` : ""}`;
-            })
-            .join("\n\n");
-        }
-
-        // Truncate theory nếu quá dài để tránh vượt quá token limit
-        const maxTheoryLength = 2000;
-        const truncatedTheory =
-          lessonContext.theory && lessonContext.theory.length > maxTheoryLength
-            ? lessonContext.theory.substring(0, maxTheoryLength) + "..."
-            : lessonContext.theory || "Chưa có nội dung lý thuyết.";
-
-        const promptData = {
-          lessonTitle: lessonContext.title || "Bài học không có tiêu đề",
-          lessonTheory: truncatedTheory,
-          lessonQuestions: questionsText,
-          question: message,
-        };
-
-        // Debug log để kiểm tra prompt data
-        console.log("Prompt data:", {
-          lessonTitle: promptData.lessonTitle,
-          theoryLength: promptData.lessonTheory.length,
-          questionsLength: promptData.lessonQuestions.length,
-          question: promptData.question,
+        response = await chain.invoke({
+          lessonTitle: sessionData.lessonContext.title,
+          lessonTheory: theory,
+          lessonQuestions: questions,
+          history: history.history || "",
+          input: message,
         });
 
-        chain = RunnableSequence.from([lessonAwarePrompt, llm, outputParser]);
-
-        const response = await chain.invoke(promptData);
-
-        return ApiSuccess.ok({
-          response,
-          hasLessonContext: true,
-          lessonTitle: lessonContext.title,
-        });
+        hasLessonContext = true;
+        lessonTitle = sessionData.lessonContext.title;
       } else {
-        // Create general IELTS chain
-        console.log("Using general IELTS prompt for message:", message);
+        // Use general prompt with conversation memory
+        const history = await sessionData.memory.loadMemoryVariables({});
 
-        chain = RunnableSequence.from([generalIELTSPrompt, llm, outputParser]);
+        const chain = RunnableSequence.from([generalPrompt, llm, outputParser]);
 
-        const response = await chain.invoke({
-          question: message,
-        });
-
-        return ApiSuccess.ok({
-          response,
-          hasLessonContext: false,
+        response = await chain.invoke({
+          history: history.history || "",
+          input: message,
         });
       }
+
+      // Save conversation to memory
+      await sessionData.memory.saveContext(
+        { input: message },
+        { output: response }
+      );
+
+      const chatResponse: ChatResponse = {
+        response,
+        hasLessonContext,
+        lessonTitle,
+        sessionId: finalSessionId,
+      };
+
+      return ApiSuccess.ok(chatResponse);
     } catch (error) {
       console.error("Chat API error:", error);
       return ApiError.internal("Failed to process chat message");
