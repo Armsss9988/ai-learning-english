@@ -101,7 +101,7 @@ export const VoiceSelector: React.FC<VoiceSelectorProps> = ({
       );
 
       if (voice || selectedVoice) {
-        utterance.voice = voice || selectedVoice;
+        utterance.voice = (voice || selectedVoice)!;
         utterance.lang = (voice || selectedVoice)!.lang;
       }
 

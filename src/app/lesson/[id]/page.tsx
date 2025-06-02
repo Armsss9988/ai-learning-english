@@ -12,28 +12,25 @@ import { useChatbot } from "@/hooks/useChatbot";
 import QuestionCard from "@/components/QuestionCard";
 import MarkdownContent from "@/components/MarkdownContent";
 import VoiceSelector from "@/components/VoiceSelector";
-
+import { Question } from "@prisma/client";
+import { use } from "react";
 const { Title } = Typography;
 
-interface LessonQuestion {
-  audioText?: string;
-  [key: string]: unknown;
-}
+type Params = Promise<{ id: string }>;
 
-export default function LessonDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { data: lesson, isLoading } = useLesson(params.id);
+export default function LessonDetailPage({ params }: { params: Params }) {
+  const [lessonId, setLessonId] = useState<string | null>(null);
+  const { data: lesson, isLoading } = useLesson(lessonId || "");
   const { setLessonContext } = useChatbot();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [selectedVoice, setSelectedVoice] =
     useState<SpeechSynthesisVoice | null>(null);
+  const paramsData = use(params);
+  setLessonId(paramsData.id);
 
   const hasAudioQuestions =
-    lesson?.questions?.some((q: LessonQuestion) => q.audioText) || false;
+    lesson?.questions?.some((q: Question) => q.audioText) || false;
 
   // Set lesson context when lesson is loaded
   useEffect(() => {
